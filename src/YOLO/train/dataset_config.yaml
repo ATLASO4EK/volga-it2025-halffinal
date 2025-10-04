@@ -1,0 +1,13 @@
+train: dataset/train/images
+
+val: dataset/val/images
+
+test:  dataset/test/images
+
+
+
+# Classes
+
+nc: 3  
+
+names: [ 'car', 'plate', 'truck']  
