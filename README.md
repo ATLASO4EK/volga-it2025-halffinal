@@ -15,6 +15,10 @@
 ![](https://img.shields.io/badge/PostgreSQL-red)\
 ![](https://img.shields.io/badge/Docker-coral)
 ---
+## Датасет 
+
+https://www.kaggle.com/datasets/kirillpribludenko/number-plates-50-russain-50-others
+---
 ## О нас
 Мы команда энтузиастов и специалистов в области искусственного интеллекта и разработки ПО:
 | Имя | GitHub | Роль | Задачи |
