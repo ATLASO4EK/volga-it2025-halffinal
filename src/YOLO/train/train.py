@@ -1,6 +1,3 @@
-import torch
-import pandas as pd
-
 from ultralytics import YOLO
 # Load a model
 if __name__ == '__main__':
