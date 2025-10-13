@@ -3,8 +3,8 @@
 >  Пайплайн определения номера ГРЗ
 ---
 # Содержание
+- [О разработчике](#о-разработчике)
 - [Стек](#стек)
-- [О нас](#о-разработчике)
 - [Данные](#данные)
 - [Модель](#модель)
 - [Обучение](#обучение)
@@ -13,18 +13,18 @@
     - [Flask](#простое-flask-api-для-определения-1-картинки-тест)
     - [RTCP](#обработка-видеопотока-rtcp)
 ---
+## О разработчике
+| Имя | GitHub | Задачи                           |
+|-----|----|----------------------------------|
+| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Data Science, ML/AI, Flask, RTCP |
+
+---
 ## Стек
 ![](https://img.shields.io/badge/Python_3.10-darkred)
 ![](https://img.shields.io/badge/PyTorch-moccasin)
 ![](https://img.shields.io/badge/ultralytics-moccasin)
 ![](https://img.shields.io/badge/pandas-moccasin)
 ![](https://img.shields.io/badge/flask-moccasin)
----
-## О разработчике
-| Имя | GitHub | Задачи                           |
-|-----|----|----------------------------------|
-| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Data Science, ML/AI, Flask, RTCP |
-
 ---
 ## Данные
 Датасет был взят из открытых источников [ссылка](https://www.kaggle.com/datasets/kirillpribludenko/number-plates-50-russain-50-others)
