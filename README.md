@@ -1,56 +1,58 @@
 # Детекция ГРЗ в реальном времени с использованием ИИ
 ![](https://img.shields.io/badge/Forum-ВолгаIT-green)
->  Описание
+>  Пайплайн определения номера ГРЗ
 ---
 # Содержание
 - [Стек](#стек)
-- [О нас](#о-нас)
+- [О нас](#о-разработчике)
+- [Данные](#данные)
+- [Модель](#модель)
+- [Обучение](#обучение)
+- [Тест](#тестирование-модели)
+- [Внедрение модели](#внедрение-модели)
+    - [Flask](#простое-flask-api-для-определения-1-картинки-тест)
+    - [RTCP](#обработка-видеопотока-rtcp)
 ---
 ## Стек
 ![](https://img.shields.io/badge/Python_3.10-darkred)
 ![](https://img.shields.io/badge/PyTorch-moccasin)
 ![](https://img.shields.io/badge/ultralytics-moccasin)
 ![](https://img.shields.io/badge/pandas-moccasin)
-![](https://img.shields.io/badge/flask-moccasin)\
-![](https://img.shields.io/badge/PostgreSQL-red)\
-![](https://img.shields.io/badge/Docker-coral)
+![](https://img.shields.io/badge/flask-moccasin)
 ---
-## Датасет 
+## О разработчике
+| Имя | GitHub | Задачи                           |
+|-----|----|----------------------------------|
+| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Data Science, ML/AI, Flask, RTCP |
 
-https://www.kaggle.com/datasets/kirillpribludenko/number-plates-50-russain-50-others
 ---
-## О нас
-Мы команда энтузиастов и специалистов в области искусственного интеллекта и разработки ПО:
-| Имя | GitHub | Роль | Задачи |
-|-----|----|------|-------------------------|
-| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Тимлид, Backend | SQL, ML, API, TG-bot |
+## Данные
+Датасет был взят из открытых источников [ссылка](https://www.kaggle.com/datasets/kirillpribludenko/number-plates-50-russain-50-others)
 
-## API
-### Описание API
-Для повышения модульности проекта и дальнейшей его 
-масштабируемости нами было разработано API для связи БД, Backend'а и Frontend'а.
 
-### Документация
+---
+## Модель
+В качестве модели для обучения была взята довольно мощная модель детекции объектов Yolo11.
 
-Раздел /api/v1/
+---
+## Обучение
+Скрипты обучения предоставлены в этом репозитории в директории src/YOLO/train
 
-`jams`
-- GET `jams`\
-_**Принимает**_:\
-_**Возвращает**_:\
-массив, содержащий информацию о предсказываемых пробках в текущий и ближайшие 3 часа в формате [[час, баллы], [час, баллы], [час, баллы], [час, баллы]]
+После обучения на полученных данных, получили вот такой график:
+[![results.png](https://i.postimg.cc/vHxqm6mF/results.png)](https://postimg.cc/7fDMsh7m)
 
-`analytics`
-- GET `analytics`\
-_**Принимает**_:\
-table - string, название таблицы из которой будут взяты данные, 'fines' или 'evacuate'\
-date_start - string, дата начала периода в формате 'YYYY-MM-DD', опционально\
-date_end - string, дата конца периода в формате 'YYYY-MM-DD', опционально\
-_**Возвращает**_:\
-словарь (Dictionary), содержащий проанализированную информацию из таблицы за выбранный период (опционально) или за все имеющиеся данные в таблице в формате:\
-{'sum_trip':sum_trip, 'sum_evac':sum_evac,
-'sum_rev':sum_rev, 'per_evac':per_evac, 'avg_rev':avg_rev} \
-или \
-{'sum_cam':sum_cam, 'sum_des':sum_des, 'sum_fin':sum_fin,
-'sum_col':sum_col, 'per_col':per_col,
-'per_cam_right':per_cam_right, 'avg_fin_des':avg_fin_des}
+---
+## Тестирование модели
+Скрипты теста модели предоставлены в этом репозитории в директории src/YOLO/test
+
+Некоторые изображения:
+[![photo.jpg](https://i.postimg.cc/J7ZKVC6F/photo.jpg)](https://postimg.cc/vD85fkd7)
+[![image.png](https://i.postimg.cc/5tD5Ts8R/image.png)](https://postimg.cc/p9YnnYGf)
+
+---
+## Внедрение модели
+### Простое Flask-api для определения 1 картинки (тест)
+[В разработке]
+
+### Обработка видеопотока (RTCP)
+[В разработке]
