@@ -1,5 +1,5 @@
-from src.API.app import app
-from src.API.handlers import *
+from app import app
+from handlers import *
 
 def main():
     app.run(host="0.0.0.0", port=8000, debug=True)

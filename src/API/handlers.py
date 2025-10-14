@@ -1,8 +1,4 @@
-import urllib
-
-import cv2
-
-from src.API.app import app
+from app import app
 from flask import jsonify, request
 import base64
 
