@@ -23,8 +23,9 @@
 ![](https://img.shields.io/badge/Python_3.10-darkred)
 ![](https://img.shields.io/badge/PyTorch-moccasin)
 ![](https://img.shields.io/badge/ultralytics-moccasin)
-![](https://img.shields.io/badge/pandas-moccasin)
 ![](https://img.shields.io/badge/flask-moccasin)
+![](https://img.shields.io/badge/pillow-moccasin)\
+![](https://img.shields.io/badge/Docker-darkred)
 
 ## Данные
 Датасет был взят из открытых источников [(ссылка)](https://www.kaggle.com/datasets/kirillpribludenko/number-plates-50-russain-50-others)\
