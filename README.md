@@ -61,11 +61,11 @@
 Исходный код находится в директории src/API
 
 Для запуска API необходимо:
-- создать виртуальную среду python и установить все зависимости из requirements.txt\
+- Создать виртуальную среду python и установить все зависимости из requirements.txt\
 `python -m venv venv`\
 `sorce venv/bin/activate`\
 `pip install -r requirements.txt`
-- запустить файл api_main.py:
+- Запустить файл api_main.py:
   - либо средствами IDE
   - либо в терминале командой\
   `python src/API/api_main.py`
