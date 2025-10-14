@@ -17,9 +17,9 @@ size = Image.open('photo.jpg').size
 response = requests.get(url, files=params)
 
 # Преобразуем и открываем ответ
-resp_str = response.content.decode('utf-8')
-resp_list = json.loads(resp_str)
-resp_img_bytes = resp_list[0]
-resp_decoded = base64.b64decode(resp_img_bytes[1:])
-img = Image.frombytes('RGB', size, resp_decoded)
-img.show()
+resp_str = response.content.decode('utf-8') # преобразуем ответ в строковый формат
+resp_list = json.loads(resp_str)    # преобразуем в list
+resp_img_bytes = resp_list[0][1:]   # берем первый объект в листе и убираем из него символ b
+resp_decoded = base64.b64decode(resp_img_bytes)     # преобразуем в байты
+img = Image.frombytes('RGB', size, resp_decoded)    # получаем картинку
+img.show()  # открываем
