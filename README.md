@@ -71,6 +71,7 @@
   `python src/API/api_main.py`
 
 Также для API был создан Dockerfile и Docker-compose для удобства запуска API на сервере\
+Они находятся в директории src/API/docker\
 [Инструкция по запуску образа Dockerfile](https://dockerhosting.ru/blog/kak-sozdat-obraz-docker-iz-dockerfile/)
 
 ### Обработка видеопотока (RTCP)
