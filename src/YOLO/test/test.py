@@ -17,4 +17,4 @@ for result in results:
     keypoints = result.keypoints  # Keypoints object for pose outputs
     probs = result.probs  # Probs object for classification outputs
     obb = result.obb  # Oriented boxes object for OBB outputs
-    result.show()  # display to screen
+    result.show()
