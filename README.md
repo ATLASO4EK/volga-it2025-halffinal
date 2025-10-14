@@ -75,5 +75,15 @@
 Они находятся в директории src/API/docker\
 [Инструкция по запуску образа Dockerfile](https://dockerhosting.ru/blog/kak-sozdat-obraz-docker-iz-dockerfile/)
 
+#### Документация к API
+Раздел `/api/v1/`
+`analyze`
+- GET `analyze`\
+_**Принимает**_:\
+file - file, файл с картинкой\
+url - str, ссылка на картинку [В РАЗРАБОТКЕ]\
+_**Возвращает**_:\
+Массив с картинками, закодированными в формат base64, пример: [str, str, ..., str]
+
 ### Обработка видеопотока (RTCP)
 [В разработке]
