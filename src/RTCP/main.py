@@ -1,5 +1,6 @@
+import cv2
 from ultralytics import YOLO
-from src.RTCP.ThreadRTCPStream import ThreadRTCPStream
+from src.RTCP.ThreadRTCPStream import ThreadedRTSPStream
 
 if __name__ == "__main__":
     rtsp_url = "rtsp://username:password@your_camera_ip:554/stream"
