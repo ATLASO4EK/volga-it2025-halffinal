@@ -1,9 +1,10 @@
 import cv2
 from ultralytics import YOLO
 from src.RTCP.ThreadRTCPStream import ThreadedRTSPStream
+from src.RTCP.config import get_url
 
 if __name__ == "__main__":
-    rtsp_url = "rtsp://username:password@your_camera_ip:554/stream"
+    rtsp_url = get_url()
     stream = ThreadedRTSPStream(rtsp_url)
 
     model = YOLO('best.pt')
