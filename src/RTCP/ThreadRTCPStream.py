@@ -21,14 +21,15 @@ class LicensePlateProcessor:
         self.detection_interval = 0.2
         self.plate_class_id = 1
 
-        # Инициализация PaddleOCR для русского языка
-        self.ocr_engine = PaddleOCR(
-            use_angle_cls=True,  # Использовать классификатор ориентации текста
-            lang='ru',  # Русский язык
-            use_gpu=False,  # Использовать GPU если доступно
-            rec_image_shape='3, 48, 320',  # Размер изображения для распознавания
-            drop_score=0.5  # Минимальный порог уверенности
-        )
+        try:
+            self.ocr_engine = PaddleOCR(
+                use_angle_cls=True,
+                lang='ru',
+            )
+        except Exception as e:
+            print(f"Ошибка при инициализации PaddleOCR: {e}")
+            # Резервный вариант с минимальной конфигурацией
+            self.ocr_engine = PaddleOCR(lang='ru')
 
         self.init_csv()
 

@@ -14,14 +14,15 @@ class VideoLicensePlateProcessor:
         self.output_csv = output_csv
         self.cap = None
 
-        # Инициализация PaddleOCR для русского языка
-        self.ocr_engine = PaddleOCR(
-            use_angle_cls=True,
-            lang='ru',
-            use_gpu=False,
-            rec_image_shape='3, 48, 320',
-            drop_score=0.5
-        )
+        try:
+            self.ocr_engine = PaddleOCR(
+                use_angle_cls=True,
+                lang='ru',
+            )
+        except Exception as e:
+            print(f"Ошибка при инициализации PaddleOCR: {e}")
+            # Резервный вариант с минимальной конфигурацией
+            self.ocr_engine = PaddleOCR(lang='ru')
 
         # Статистика
         self.total_plates_detected = 0
