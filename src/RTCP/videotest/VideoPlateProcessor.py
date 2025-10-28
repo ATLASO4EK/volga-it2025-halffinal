@@ -136,8 +136,12 @@ class VideoLicensePlateProcessor:
             return image
 
     def ocr_function(self, plate_image):
-        """Функция OCR для распознавания российских номерных знаков используя PaddleOCR"""
+        """
+        Функция OCR для распознавания российских номерных знаков с использованием PaddleOCR
+        с обработкой возможных ошибок.
+        """
         try:
+            # Проверка входного изображения
             if plate_image is None or plate_image.size == 0:
                 return "####"
 
@@ -147,35 +151,33 @@ class VideoLicensePlateProcessor:
             else:
                 plate_rgb = cv2.cvtColor(plate_image, cv2.COLOR_GRAY2RGB)
 
-            # Дополнительная предобработка для улучшения распознавания
-            processed_plate = self.enhance_plate_image(plate_rgb)
-
             # Выполняем OCR
-            result = self.ocr_engine.ocr(processed_plate, cls=True)
+            # Убедитесь, что не передаете устаревший параметр 'cls'
+            result = self.ocr_engine.ocr(plate_rgb)
 
-            if result is None or not result[0]:
+            # ВАЖНО: Проверяем структуру результата
+            # Если результат пустой или не содержит распознанных текстов
+            if not result or not result[0]:
                 return "####"
 
-            # Извлекаем все распознанные тексты
-            all_texts = []
-            for line in result[0]:
-                if len(line) >= 2:
-                    text = line[1][0]
-                    confidence = line[1][1]
-                    if confidence > 0.5:  # Фильтр по уверенности
-                        all_texts.append((text, confidence))
+            # Извлекаем первый (наиболее уверенный) результат
+            # Структура: result[0] содержит список блоков для первого изображения
+            first_block = result[0]
 
-            if not all_texts:
-                return "####"
+            # Проверяем, есть ли хотя бы один распознанный текст в блоке
+            if len(first_block) > 0:
+                # Первый элемент в first_block - это данные самого уверенного распознавания
+                best_text = first_block[0][1][0]  # Текст
+                confidence = first_block[0][1][1]  # Уверенность
 
-            # Выбираем текст с наибольшей уверенностью
-            best_text, best_confidence = max(all_texts, key=lambda x: x[1])
+                # Применяем порог уверенности
+                if confidence > 0.5:
+                    formatted_plate = self.format_plate_number(best_text)
+                    print(f"PaddleOCR распознал: '{best_text}' -> '{formatted_plate}' (уверенность: {confidence:.3f})")
+                    return formatted_plate
 
-            # Очистка и форматирование номера
-            formatted_plate = self.format_plate_number(best_text)
-
-            print(f"PaddleOCR распознал: '{best_text}' -> '{formatted_plate}' (уверенность: {best_confidence:.3f})")
-            return formatted_plate
+            # Если ни одно условие не выполнено
+            return "####"
 
         except Exception as e:
             print(f"Ошибка в PaddleOCR: {e}")
