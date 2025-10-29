@@ -65,7 +65,6 @@ class VideoLicensePlateProcessor:
     def extract_plate_region(self, frame, bbox):
         """Извлечение региона номерного знака из кадра"""
         x1, y1, x2, y2 = map(int, bbox)
-        # Обрезка с проверкой границ
         h, w = frame.shape[:2]
         x1, y1 = max(0, x1), max(0, y1)
         x2, y2 = min(w, x2), min(h, y2)
@@ -88,10 +87,8 @@ class VideoLicensePlateProcessor:
             else:
                 gray = plate_image
 
-            # Увеличение контраста
             gray = cv2.equalizeHist(gray)
 
-            # Нормализация размера (примерно 200px по ширине)
             h, w = gray.shape
             if w > 0 and h > 0:
                 scale_factor = 200.0 / w
@@ -113,11 +110,9 @@ class VideoLicensePlateProcessor:
         """Улучшение изображения номерного знака для лучшего распознавания"""
         try:
             if len(image.shape) == 3:
-                # Увеличение резкости
                 kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
                 sharpened = cv2.filter2D(image, -1, kernel)
 
-                # Увеличение контраста с CLAHE
                 lab = cv2.cvtColor(sharpened, cv2.COLOR_BGR2LAB)
                 l, a, b = cv2.split(lab)
                 clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
@@ -145,32 +140,25 @@ class VideoLicensePlateProcessor:
             if plate_image is None or plate_image.size == 0:
                 return "####"
 
-            # Конвертируем в RGB (PaddleOCR работает с RGB)
+
             if len(plate_image.shape) == 3:
                 plate_rgb = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
             else:
                 plate_rgb = cv2.cvtColor(plate_image, cv2.COLOR_GRAY2RGB)
 
-            # Выполняем OCR
-            # Убедитесь, что не передаете устаревший параметр 'cls'
+
             result = self.ocr_engine.ocr(plate_rgb)
 
-            # ВАЖНО: Проверяем структуру результата
-            # Если результат пустой или не содержит распознанных текстов
+
             if not result or not result[0]:
                 return "####"
 
-            # Извлекаем первый (наиболее уверенный) результат
-            # Структура: result[0] содержит список блоков для первого изображения
             first_block = result[0]
 
-            # Проверяем, есть ли хотя бы один распознанный текст в блоке
             if len(first_block) > 0:
-                # Первый элемент в first_block - это данные самого уверенного распознавания
                 best_text = first_block[0][1][0]  # Текст
                 confidence = first_block[0][1][1]  # Уверенность
 
-                # Применяем порог уверенности
                 if confidence > 0.5:
                     formatted_plate = self.format_plate_number(best_text)
                     print(f"PaddleOCR распознал: '{best_text}' -> '{formatted_plate}' (уверенность: {confidence:.3f})")
