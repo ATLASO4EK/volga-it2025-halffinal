@@ -1,0 +1,1 @@
+RTSP_URL = "rtsp://username:password@your_camera_ip:554/stream"

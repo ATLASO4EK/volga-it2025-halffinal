@@ -1,39 +1,52 @@
-from src.RTCP.ThreadRTCPStream import LicensePlateProcessor
-import argparse
-import os
+import numpy as np
+import torch
+from PIL import Image
+from ultralytics import YOLO
+from config import *
+import csv
+import datetime
 
-def main():
-    parser = argparse.ArgumentParser(description='Обработка RTSP потока для детекции номерных знаков')
-    parser.add_argument('--model', type=str, default='best.pt',
-                        help='Путь к файлу модели YOLO (default: best.pt)')
-    parser.add_argument('--output', type=str, default='output.csv',
-                        help='Имя выходного CSV файла (default: output.csv)')
+import paddleocr
+import re
 
-    args = parser.parse_args()
+import easyocr
+import cv2
+import numpy as np
 
-    # Проверка существования файла модели
-    if not os.path.exists(args.model):
-        print(f"Ошибка: Файл модели {args.model} не найден")
-        return
+def recognize_license_plate(image_path):
+    reader = easyocr.Reader(['ru', 'en'])
 
-    # Импорт конфигурации из config.py
-    try:
-        from config import RTSP_URL
-    except ImportError:
-        print("Ошибка: Создайте файл config.py с переменной RTSP_URL")
-        print("Пример содержимого config.py:")
-        print("RTSP_URL = 'rtsp://username:password@ip_address:port/stream'")
-        return
+    open_cv_image = np.array(image_path)
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-    # Создание и запуск процессора
-    processor = LicensePlateProcessor(
-        model_path=args.model,
-        rtsp_url=RTSP_URL,
-        output_csv=args.output
+    gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)  # Конвертируем в оттенки серого
+
+    results = reader.readtext(
+        gray
     )
+    try:
+        return results[0].text
+    except:
+        return "########"
 
-    processor.run()
+def save_detection(plate_number):
+    """Сохранение результата в CSV с дополнительной информацией"""
+    with open(f'{output_folder}/results.csv', 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        time_str = datetime.datetime.now().strftime("%H:%M:%S")
+        writer.writerow([time_str, plate_number])
 
+print('Script Started\n------------')
 
-if __name__ == "__main__":
-    main()
+model = YOLO('best.pt')
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+results = model(video_path if isVideo else RTSP_url, save=False, device=device, stream=True, conf=0.35, classes=[1.])
+for result in results:
+    boxes = result.boxes
+    for box in boxes:
+        if box.cls.item() == 1.:
+            img_bgr = result.plot()
+            xyxy = box[0].xyxy.cpu().numpy().tolist()[0]
+            save_detection(recognize_license_plate(Image.fromarray(img_bgr[..., ::-1]).crop(xyxy)))
