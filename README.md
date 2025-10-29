@@ -17,7 +17,7 @@
 ## О разработчике
 | Имя | GitHub | Задачи                           |
 |-----|----|----------------------------------|
-| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Data Science, ML/AI, Flask, RTCP |
+| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | Data Science, ML/AI, Flask, RTSP |
 
 
 ## Стек
