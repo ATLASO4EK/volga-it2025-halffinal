@@ -28,19 +28,16 @@ class LicensePlateProcessor:
             )
         except Exception as e:
             print(f"Ошибка при инициализации PaddleOCR: {e}")
-            # Резервный вариант с минимальной конфигурацией
             self.ocr_engine = PaddleOCR(lang='ru')
 
         self.init_csv()
 
     def init_csv(self):
-        """Инициализация CSV файла с заголовками"""
         with open(self.output_csv, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(['time', 'plate_num'])
 
     def connect_to_stream(self):
-        """Подключение к RTSP потоку"""
         self.cap = cv2.VideoCapture(self.rtsp_url)
         if not self.cap.isOpened():
             raise ConnectionError(f"Не удалось подключиться к RTSP потоку: {self.rtsp_url}")
@@ -49,7 +46,6 @@ class LicensePlateProcessor:
         return True
 
     def format_time(self, milliseconds):
-        """Форматирование времени в формат ММ:СС.мс"""
         td = timedelta(milliseconds=milliseconds)
         total_seconds = int(td.total_seconds())
         minutes = total_seconds // 60
@@ -59,7 +55,6 @@ class LicensePlateProcessor:
         return f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
 
     def extract_plate_region(self, frame, bbox):
-        """Извлечение региона номерного знака из кадра"""
         x1, y1, x2, y2 = map(int, bbox)
         # Обрезка с проверкой границ
         h, w = frame.shape[:2]
@@ -73,20 +68,16 @@ class LicensePlateProcessor:
         return plate_region
 
     def preprocess_plate_image(self, plate_image):
-        """Предобработка изображения номерного знака для OCR"""
         if plate_image is None or plate_image.size == 0:
             return None
 
-        # Конвертация в grayscale
         if len(plate_image.shape) == 3:
             gray = cv2.cvtColor(plate_image, cv2.COLOR_BGR2GRAY)
         else:
             gray = plate_image
 
-        # Увеличение контраста
         gray = cv2.equalizeHist(gray)
 
-        # Нормализация размера (примерно 200px по ширине)
         h, w = gray.shape
         if w > 0:
             scale_factor = 200.0 / w
@@ -99,42 +90,32 @@ class LicensePlateProcessor:
         return resized
 
     def mock_ocr_function(self, plate_image):
-        """
-        Реальная функция OCR для распознавания российских номерных знаков
-        используя PaddleOCR [citation:1][citation:4][citation:5]
-        """
         try:
-            # Конвертируем в RGB (PaddleOCR работает с RGB)
             if len(plate_image.shape) == 3:
                 plate_rgb = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
             else:
                 plate_rgb = cv2.cvtColor(plate_image, cv2.COLOR_GRAY2RGB)
 
-            # Дополнительная предобработка для улучшения распознавания
             processed_plate = self.enhance_plate_image(plate_rgb)
 
-            # Выполняем OCR [citation:4]
             result = self.ocr_engine.ocr(processed_plate, cls=True)
 
             if result is None or not result[0]:
                 return "####"
 
-            # Извлекаем все распознанные тексты
             all_texts = []
             for line in result[0]:
                 if len(line) >= 2:
                     text = line[1][0]
                     confidence = line[1][1]
-                    if confidence > 0.5:  # Фильтр по уверенности
+                    if confidence > 0.5:
                         all_texts.append((text, confidence))
 
             if not all_texts:
                 return "####"
 
-            # Выбираем текст с наибольшей уверенностью
             best_text, best_confidence = max(all_texts, key=lambda x: x[1])
 
-            # Очистка и форматирование номера
             formatted_plate = self.format_plate_number(best_text)
 
             print(f"PaddleOCR распознал: '{best_text}' -> '{formatted_plate}' (уверенность: {best_confidence:.3f})")
@@ -145,15 +126,10 @@ class LicensePlateProcessor:
             return "####"
 
     def enhance_plate_image(self, image):
-        """
-        Улучшение изображения номерного знака для лучшего распознавания [citation:1]
-        """
         try:
-            # Увеличение резкости
             kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
             sharpened = cv2.filter2D(image, -1, kernel)
 
-            # Увеличение контраста
             lab = cv2.cvtColor(sharpened, cv2.COLOR_RGB2LAB)
             l, a, b = cv2.split(lab)
             clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
@@ -161,9 +137,8 @@ class LicensePlateProcessor:
             enhanced_lab = cv2.merge([l, a, b])
             enhanced = cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB)
 
-            # Нормализация размера
             h, w = enhanced.shape[:2]
-            if w < 100:  # Увеличиваем маленькие изображения
+            if w < 100:
                 scale = 100.0 / w
                 new_w = 100
                 new_h = int(h * scale)
@@ -176,17 +151,11 @@ class LicensePlateProcessor:
             return image
 
     def format_plate_number(self, text):
-        """
-        Форматирование распознанного текста в стандартный формат российского номера
-        A123BC456 или с # для нераспознанных символов [citation:1]
-        """
-        # Удаляем все пробелы и нежелательные символы
         cleaned = re.sub(r'[^A-Za-z0-9А-Яа-я]', '', str(text).upper())
 
         if not cleaned:
             return "####"
 
-        # Заменяем кириллические символы на латинские аналоги
         cyrillic_to_latin = {
             'А': 'A', 'В': 'B', 'Е': 'E', 'К': 'K', 'М': 'M', 'Н': 'H',
             'О': 'O', 'Р': 'P', 'С': 'C', 'Т': 'T', 'У': 'Y', 'Х': 'X'
@@ -199,13 +168,10 @@ class LicensePlateProcessor:
             else:
                 converted += char
 
-        # Проверяем соответствие шаблону российского номера
-        # Буква-3цифры-2буквы-2цифры или варианты
         pattern = r'^[A-Z]?(\d{0,3})[A-Z]{0,2}(\d{0,2})$'
         match = re.match(pattern, converted)
 
         if not match:
-            # Если не соответствует шаблону, оставляем только буквы и цифры, заменяя неподходящие на #
             validated = ''
             for char in converted:
                 if char.isalnum():
@@ -213,7 +179,6 @@ class LicensePlateProcessor:
                 else:
                     validated += '#'
 
-            # Ограничиваем длину и добавляем # при необходимости
             if len(validated) < 8:
                 validated = validated.ljust(8, '#')
             elif len(validated) > 9:
@@ -221,16 +186,12 @@ class LicensePlateProcessor:
 
             return validated
 
-        # Если соответствует шаблону, форматируем должным образом
         return converted
 
     def is_valid_plate_format(self, plate_number):
-        """Базовая проверка формата номерного знака"""
         if not plate_number or plate_number.strip() == "":
             return False
 
-        # Проверяем, что номер содержит хотя бы один буквенный и один цифровой символ
-        # или соответствует формату с решетками (частичное распознавание)
         has_letter = any(c.isalpha() for c in plate_number)
         has_digit = any(c.isdigit() for c in plate_number)
         has_hash = '#' in plate_number
@@ -238,10 +199,8 @@ class LicensePlateProcessor:
         return (has_letter and has_digit) or (has_hash and (has_letter or has_digit))
 
     def process_frame(self, frame, frame_count, fps):
-        """Обработка одного кадра - анализ всех обнаруженных ГРЗ с улучшенной логикой"""
-        current_time = frame_count / fps  # Текущее время в секундах
+        current_time = frame_count / fps
 
-        # Детекция объектов с помощью YOLO
         results = self.model(frame, verbose=False)
 
         plates_processed = 0
@@ -252,36 +211,28 @@ class LicensePlateProcessor:
                     class_id = int(box.cls.item())
                     confidence = box.conf.item()
 
-                    # Обрабатываем только номерные знаки (class_id = 1)
-                    if class_id == self.plate_class_id and confidence > 0.3:  # Понизим порог для большего охвата
+                    if class_id == self.plate_class_id and confidence > 0.3:
                         bbox = box.xyxy[0].cpu().numpy()
 
-                        # Извлекаем регион номерного знака
                         plate_region = self.extract_plate_region(frame, bbox)
 
                         if plate_region is not None:
-                            # Проверяем минимальный размер региона (чтобы избежать обработки слишком мелких детекций)
                             h, w = plate_region.shape[:2]
-                            if h < 20 or w < 60:  # Минимальные размеры для читаемого номера
+                            if h < 20 or w < 60:
                                 continue
 
-                            # Предобработка для OCR
                             processed_plate = self.preprocess_plate_image(plate_region)
 
                             if processed_plate is not None:
-                                # Распознавание номера
                                 plate_number = self.mock_ocr_function(processed_plate)
 
-                                # Проверка на валидность номера (базовая проверка формата)
                                 if self.is_valid_plate_format(plate_number):
-                                    # Запись в CSV
                                     self.save_detection(current_time * 1000, plate_number, confidence)
                                     plates_processed += 1
 
                                     print(
                                         f"Обнаружен номер: {plate_number} в {self.format_time(current_time * 1000)} (уверенность: {confidence:.2f})")
 
-        # Статистика по кадру
         if plates_processed > 0:
             self.last_detection_time = current_time
             print(f"Кадр {frame_count}: обработано {plates_processed} номерных знаков")
@@ -289,16 +240,12 @@ class LicensePlateProcessor:
         return plates_processed
 
     def save_detection(self, timestamp_ms, plate_number, confidence=0.0):
-        """Сохранение результата в CSV с дополнительной информацией"""
         with open(self.output_csv, 'a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             time_str = self.format_time(timestamp_ms)
-            # Можно добавить столбец с уверенностью детекции при необходимости
             writer.writerow([time_str, plate_number])
-            # Или: writer.writerow([time_str, plate_number, f"{confidence:.2f}"])
 
     def run(self):
-        """Основной цикл обработки видео"""
         try:
             if not self.connect_to_stream():
                 return
@@ -314,21 +261,14 @@ class LicensePlateProcessor:
                     print("Не удалось получить кадр из потока")
                     break
 
-                # Вычисление FPS
                 frame_count += 1
                 current_time = time.time() - start_time
                 fps = frame_count / current_time if current_time > 0 else 0
 
-                # Обработка кадра
                 self.process_frame(frame, frame_count, fps)
 
-                # Визуализация для отладки (опционально)
-                if frame_count % 100 == 0:  # Вывод каждые 100 кадров
+                if frame_count % 100 == 0:
                     print(f"Обработано кадров: {frame_count}, FPS: {fps:.2f}")
-
-                # Добавьте условие для выхода по необходимости
-                # if cv2.waitKey(1) & 0xFF == ord('q'):
-                #     break
 
         except KeyboardInterrupt:
             print("Обработка прервана пользователем")

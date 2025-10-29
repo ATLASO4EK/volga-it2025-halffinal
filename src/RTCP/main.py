@@ -30,7 +30,6 @@ def recognize_license_plate(image_path):
         return "########"
 
 def save_detection(plate_number):
-    """Сохранение результата в CSV с дополнительной информацией"""
     with open(f'{output_folder}/results.csv', 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         time_str = datetime.datetime.now().strftime("%H:%M:%S")
