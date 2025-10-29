@@ -1,4 +1,4 @@
-from src.RTCP.Depricated.ThreadRTCPStream import LicensePlateProcessor
+from src.RTSP.Depricated.ThreadRTCPStream import LicensePlateProcessor
 import argparse
 import os
 
